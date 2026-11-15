@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Topdik-KU — yo'qolgan va topilgan narsalarni birlashtiruvchi zamonaviy platforma">
+  <title>Topdik-KU — Yo'qolgan narsangizni toping</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <script src="js/theme.js"></script>
+</head>
+<body>
+  <div id="app-header"></div>
+  
+  <main class="main">
+    <!-- Hero -->
+    <section class="hero">
+      <div class="container">
+        <h1 class="hero__title" data-i18n="hero_title">Yo'qolgan narsangizni toping</h1>
+        <p class="hero__subtitle" data-i18n="hero_subtitle">Topdik-KU — yo'qolgan va topilgan narsalarni birlashtiruvchi zamonaviy platforma. Tez, xavfsiz va ishonchli.</p>
+        
+        <div class="hero__search">
+          <svg class="hero__search-icon" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="search" id="heroSearch" class="hero__search-input" data-i18n-placeholder="hero_search_placeholder" placeholder="Narsa nomi, kategoriya yoki joylashuvni qidiring...">
+        </div>
+        
+        <div class="hero__actions">
+          <a href="report.html?type=lost" class="btn btn-primary btn-lg">
+            <span data-i18n="hero_btn_lost">Yo'qotdim</span>
+          </a>
+          <a href="report.html?type=found" class="btn btn-secondary btn-lg">
+            <span data-i18n="hero_btn_found">Topdim</span>
+          </a>
+        </div>
+      </div>
+    </section>
+    
+    <div class="container">
+      <!-- Stats -->
+      <section class="section">
+        <div class="stats" id="statsGrid">
+          <!-- filled by JS -->
+        </div>
+      </section>
+      
+      <!-- Recent Found -->
+      <section class="section">
+        <div class="section__header">
+          <h2 class="section__title" data-i18n="section_recent_found">Yaqinda topilganlar</h2>
+          <a href="found.html" class="section__link" data-i18n="view_all">Barchasini ko'rish →</a>
+        </div>
+        <div class="grid grid-4" id="recentFound">
+          <!-- filled by JS -->
+        </div>
+      </section>
+      
+      <!-- Recent Lost -->
+      <section class="section">
+        <div class="section__header">
+          <h2 class="section__title" data-i18n="section_recent_lost">Yaqinda yo'qolganlar</h2>
+          <a href="lost.html" class="section__link" data-i18n="view_all">Barchasini ko'rish →</a>
+        </div>
+        <div class="grid grid-4" id="recentLost">
+          <!-- filled by JS -->
+        </div>
+      </section>
+      
+      <!-- Categories -->
+      <section class="section">
+        <div class="section__header">
+          <h2 class="section__title" data-i18n="section_categories">Mashhur kategoriyalar</h2>
+        </div>
+        <div class="categories" id="categoriesGrid">
+          <!-- filled by JS -->
+        </div>
+      </section>
+      
+      <!-- How it works -->
+      <section class="section">
+        <div class="section__header">
+          <h2 class="section__title" data-i18n="section_how">Qanday ishlaydi</h2>
+        </div>
+        <div class="steps">
+          <div class="glass-card step">
+            <div class="step__num">1</div>
+            <h3 class="step__title" data-i18n="step1_title">E'lon bering</h3>
+            <p class="step__desc" data-i18n="step1_desc">Yo'qolgan yoki topilgan narsangiz haqida batafsil ma'lumot va rasm bilan e'lon yarating.</p>
+          </div>
+          <div class="glass-card step">
+            <div class="step__num">2</div>
+            <h3 class="step__title" data-i18n="step2_title">Moslikni toping</h3>
+            <p class="step__desc" data-i18n="step2_desc">Smart Match tizimi o'xshash e'lonlarni avtomatik topib, sizga xabar beradi.</p>
+          </div>
+          <div class="glass-card step">
+            <div class="step__num">3</div>
+            <h3 class="step__title" data-i18n="step3_title">Xavfsiz qaytarish</h3>
+            <p class="step__desc" data-i18n="step3_desc">Xabarlar orqali bog'laning, egalikni tasdiqlang va narsani xavfsiz qaytaring.</p>
+          </div>
+        </div>
+      </section>
+      
+      <!-- CTA -->
+      <section class="section">
+        <div class="cta">
+          <h2 data-i18n="cta_title">Bugun narsangizni toping!</h2>
+          <p data-i18n="cta_desc">Minglab odamlar allaqachon yo'qolgan narsalarini qaytargan. Siz ham qo'shiling.</p>
+          <a href="report.html" class="btn btn-lg" data-i18n="cta_btn">Bepul e'lon berish</a>
+        </div>
+      </section>
+    </div>
+  </main>
+  
+  <div id="app-footer"></div>
+  
+  <script src="js/i18n.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/cloud.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.initCommon('home');
+
+      const catIcons = {
+        electronics: '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg>',
+        documents: '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>',
+        keys: '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',
+        bags: '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>',
+        clothes: '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.48a1 1 0 0 0 .99.83H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.83l.58-3.48a2 2 0 0 0-1.34-2.23z"/></svg>',
+        jewelry: '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>',
+        pets: '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10 5.2A2.2 2.2 0 0 1 12.2 3a2.2 2.2 0 0 1 2.2 2.2c0 1.2-.96 2.2-2.2 2.2-1.2 0-2.2-1-2.2-2.2zM4.5 10.2A2.2 2.2 0 0 1 6.7 8a2.2 2.2 0 0 1 2.2 2.2c0 1.2-.96 2.2-2.2 2.2-1.2 0-2.2-1-2.2-2.2zM15.1 10.2A2.2 2.2 0 0 1 17.3 8a2.2 2.2 0 0 1 2.2 2.2c0 1.2-.96 2.2-2.2 2.2-1.2 0-2.2-1-2.2-2.2z"/><path d="M8 16c0-2.2 1.8-4 4-4s4 1.8 4 4v3H8v-3z"/></svg>',
+        other: '<svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>'
+      };
+
+      function renderHome() {
+        const stats = DataStore.getStats();
+        document.getElementById('statsGrid').innerHTML = `
+          <div class="glass-card stat-card">
+            <div class="stat-card__value">${stats.found}</div>
+            <div class="stat-card__label" data-i18n="stat_found">${t('stat_found')}</div>
+          </div>
+          <div class="glass-card stat-card">
+            <div class="stat-card__value">${stats.returned}</div>
+            <div class="stat-card__label" data-i18n="stat_returned">${t('stat_returned')}</div>
+          </div>
+          <div class="glass-card stat-card">
+            <div class="stat-card__value">${stats.users}</div>
+            <div class="stat-card__label" data-i18n="stat_users">${t('stat_users')}</div>
+          </div>
+          <div class="glass-card stat-card">
+            <div class="stat-card__value">${stats.success}%</div>
+            <div class="stat-card__label" data-i18n="stat_success">${t('stat_success')}</div>
+          </div>
+        `;
+
+        const emptyHtml = `
+          <div class="empty-state" style="grid-column:1/-1;padding:2.5rem 1rem">
+            <p style="margin-bottom:0.75rem;color:var(--text-muted)">Hali e'lonlar yo'q</p>
+            <a href="report.html" class="btn btn-primary btn-sm">${t('nav_report')}</a>
+          </div>`;
+
+        const found = DataStore.getItems({ type: 'found', status: 'active' }).slice(0, 4);
+        document.getElementById('recentFound').innerHTML = found.length
+          ? found.map(i => UI.itemCard(i)).join('')
+          : emptyHtml;
+
+        const lost = DataStore.getItems({ type: 'lost', status: 'active' }).slice(0, 4);
+        document.getElementById('recentLost').innerHTML = lost.length
+          ? lost.map(i => UI.itemCard(i)).join('')
+          : emptyHtml;
+
+        document.getElementById('categoriesGrid').innerHTML = CATEGORIES.map(c => `
+          <a href="found.html?category=${c.id}" class="glass-card category-card">
+            <div class="category-card__icon" style="color:var(--accent)">${catIcons[c.id] || catIcons.other}</div>
+            <span class="category-card__name">${t('cat_' + c.id)}</span>
+          </a>
+        `).join('');
+
+        updatePageTranslations();
+      }
+
+      renderHome();
+
+      // After cloud loads / updates from other devices
+      document.addEventListener('cloudSynced', renderHome);
+      document.addEventListener('cloudDataUpdated', renderHome);
+
+      document.getElementById('heroSearch').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const q = e.target.value.trim();
+          if (q) location.href = `found.html?q=${encodeURIComponent(q)}`;
+        }
+      });
+    });
+  </script>
+  </script>
+</body>
+</html>

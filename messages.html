@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xabarlar — Topdik-KU</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <script src="js/theme.js"></script>
+  <style>
+    .messages-layout { display: grid; grid-template-columns: 320px 1fr; gap: 1.5rem; min-height: 500px; }
+    .conv-list { border-radius: var(--radius-lg); overflow: hidden; max-height: 600px; overflow-y: auto; }
+    .conv-item { display: flex; gap: 0.75rem; padding: 1rem; cursor: pointer; border-bottom: 1px solid var(--border); transition: background var(--transition); }
+    .conv-item:hover, .conv-item.active { background: var(--accent-soft); }
+    .conv-avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; font-weight: 600; color: var(--accent); flex-shrink: 0; }
+    .chat-area { display: flex; flex-direction: column; border-radius: var(--radius-lg); min-height: 500px; }
+    .chat-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); font-weight: 600; }
+    .chat-messages { flex: 1; padding: 1.25rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; max-height: 400px; }
+    .msg { max-width: 75%; padding: 0.75rem 1rem; border-radius: var(--radius-md); font-size: 0.9375rem; }
+    .msg.mine { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 4px; }
+    .msg.theirs { align-self: flex-start; background: var(--bg-card); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+    .chat-input { display: flex; gap: 0.75rem; padding: 1rem; border-top: 1px solid var(--border); }
+    .chat-input input { flex: 1; }
+    @media (max-width: 768px) {
+      .messages-layout { grid-template-columns: 1fr; }
+      .conv-list { max-height: 200px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app-header"></div>
+  
+  <main class="main">
+    <div class="container">
+      <h1 style="margin-bottom:1.5rem" data-i18n="messages_title">Xabarlar</h1>
+      
+      <div class="messages-layout">
+        <div class="glass conv-list" id="convList"></div>
+        
+        <div class="glass chat-area" id="chatArea">
+          <div class="empty-state" style="flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column">
+            <div style="font-size:2.5rem;margin-bottom:0.75rem">💬</div>
+            <p data-i18n="messages_empty">Hali xabarlar yo'q</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <div id="app-footer"></div>
+  
+  <script src="js/i18n.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/cloud.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.initCommon('messages');
+      
+      const session = DataStore.getSession();
+      if (!session) {
+        location.href = 'auth.html?mode=login&redirect=messages.html';
+        return;
+      }
+      
+      const params = new URLSearchParams(location.search);
+      const toId = params.get('to');
+      const itemId = params.get('item');
+      
+      // If coming from item contact, ensure conversation context
+      if (toId && itemId) {
+        const item = DataStore.getItem(itemId);
+        if (item && !DataStore.getMessages(session.id, toId, itemId).length) {
+          // just open chat
+        }
+      }
+      
+      function renderConvs() {
+        const convs = DataStore.getConversations(session.id);
+        const list = document.getElementById('convList');
+        
+        if (convs.length === 0 && !(toId && itemId)) {
+          list.innerHTML = `<div class="empty-state" style="padding:2rem">
+          <p style="margin-bottom:0.75rem">${t('messages_empty')}</p>
+          <p style="font-size:0.8125rem;color:var(--text-muted);line-height:1.5">E'lon ochib <strong>Bog'lanish</strong> tugmasini bosing — suhbat shu yerda ochiladi.</p>
+        </div>`;
+          return;
+        }
+        
+        let html = convs.map(c => `
+          <div class="conv-item" data-other="${c.otherId}" data-item="${c.itemId}">
+            <div class="conv-avatar">${(c.otherName || 'U')[0]}</div>
+            <div style="min-width:0;flex:1">
+              <div style="font-weight:600;font-size:0.9375rem">${UI.escape(c.otherName)}</div>
+              <div style="font-size:0.8125rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${UI.escape(c.itemTitle)}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted)">${UI.timeAgo(c.lastAt)}</div>
+            </div>
+          </div>
+        `).join('');
+        
+        // Add pending new conversation
+        if (toId && itemId) {
+          const item = DataStore.getItem(itemId);
+          const exists = convs.some(c => c.otherId === toId && c.itemId === itemId);
+          if (!exists && item) {
+            html = `
+              <div class="conv-item active" data-other="${toId}" data-item="${itemId}">
+                <div class="conv-avatar">${(item.userName || 'U')[0]}</div>
+                <div>
+                  <div style="font-weight:600">${UI.escape(item.userName)}</div>
+                  <div style="font-size:0.8125rem;color:var(--text-muted)">${UI.escape(item.title)}</div>
+                </div>
+              </div>
+            ` + html;
+          }
+        }
+        
+        list.innerHTML = html || `<div class="empty-state" style="padding:2rem"><p>${t('messages_empty')}</p></div>`;
+        
+        list.querySelectorAll('.conv-item').forEach(el => {
+          el.addEventListener('click', () => openChat(el.dataset.other, el.dataset.item));
+        });
+      }
+      
+      function openChat(otherId, itemId) {
+        document.querySelectorAll('.conv-item').forEach(el => {
+          el.classList.toggle('active', el.dataset.other === otherId && el.dataset.item === itemId);
+        });
+        
+        const item = DataStore.getItem(itemId);
+        const msgs = DataStore.getMessages(session.id, otherId, itemId);
+        const otherName = item?.userId === otherId ? item.userName : (msgs[0]?.from === otherId ? msgs[0].fromName : msgs[0]?.toName) || 'User';
+        
+        document.getElementById('chatArea').innerHTML = `
+          <div class="chat-header">${UI.escape(otherName)} — ${UI.escape(item?.title || '')}</div>
+          <div class="chat-messages" id="chatMsgs">
+            ${msgs.map(m => `
+              <div class="msg ${m.from === session.id ? 'mine' : 'theirs'}">${UI.escape(m.text)}</div>
+            `).join('') || '<p style="text-align:center;color:var(--text-muted);font-size:0.875rem">Suhbatni boshlang</p>'}
+          </div>
+          <div class="chat-input">
+            <input type="text" id="msgInput" class="form-input" data-i18n-placeholder="messages_placeholder" placeholder="Xabar yozing...">
+            <button class="btn btn-primary" id="sendBtn">➤</button>
+          </div>
+        `;
+        
+        const msgsEl = document.getElementById('chatMsgs');
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+        
+        document.getElementById('sendBtn').addEventListener('click', send);
+        document.getElementById('msgInput').addEventListener('keydown', e => { if (e.key === 'Enter') send(); });
+        
+        function send() {
+          const input = document.getElementById('msgInput');
+          const text = input.value.trim();
+          if (!text) return;
+          
+          DataStore.sendMessage({
+            from: session.id,
+            fromName: session.name,
+            to: otherId,
+            toName: otherName,
+            itemId,
+            itemTitle: item?.title || '',
+            text
+          });
+          
+          input.value = '';
+          openChat(otherId, itemId);
+          renderConvs();
+        }
+      }
+      
+      let currentChat = { otherId: null, itemId: null };
+
+      const _openChat = openChat;
+      openChat = function(otherId, itemId) {
+        currentChat = { otherId, itemId };
+        _openChat(otherId, itemId);
+      };
+
+      renderConvs();
+      
+      if (toId && itemId) {
+        openChat(toId, itemId);
+      }
+      
+      // Cloud dan yangi xabarlar
+      function refreshFromCloud() {
+        renderConvs();
+        if (currentChat.otherId && currentChat.itemId) {
+          openChat(currentChat.otherId, currentChat.itemId);
+        }
+      }
+      document.addEventListener('cloudSynced', refreshFromCloud);
+      document.addEventListener('cloudDataUpdated', refreshFromCloud);
+      
+      updatePageTranslations();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yordam — Topdik-KU</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <script src="js/theme.js"></script>
+  <style>
+    .support-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 2rem; }
+    .faq-item { padding: 1.25rem 0; border-bottom: 1px solid var(--border); }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q { font-weight: 600; margin-bottom: 0.4rem; cursor: pointer; display: flex; justify-content: space-between; gap: 1rem; }
+    .faq-a { font-size: 0.9375rem; color: var(--text-secondary); display: none; line-height: 1.6; }
+    .faq-item.open .faq-a { display: block; margin-top: 0.5rem; }
+    @media (max-width: 768px) { .support-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="app-header"></div>
+  
+  <main class="main">
+    <div class="container">
+      <h1 style="margin-bottom:0.5rem">Yordam / Support</h1>
+      <p style="color:var(--text-muted);margin-bottom:2rem;max-width:560px">
+        Savollaringiz bormi? Quyida eng ko'p so'raladigan savollar va bog'lanish formasi.
+      </p>
+      
+      <div class="support-grid">
+        <div class="glass-card" style="padding:1.5rem">
+          <h2 style="font-size:1.15rem;margin-bottom:1rem">Ko'p so'raladigan savollar</h2>
+          
+          <div class="faq-item open">
+            <div class="faq-q">Qanday qilib e'lon beraman? <span>+</span></div>
+            <div class="faq-a">«E'lon berish» tugmasini bosing. Hisobsiz ham e'lon qoldirish mumkin. Rasm, joylashuv va tavsifni to'ldiring.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">O'z e'lonimni qanday o'chiraman? <span>+</span></div>
+            <div class="faq-a">Tizimga kiring → Profil → Mening e'lonlarim. Admin panel orqali ham o'chirish mumkin.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">Boshqa odam mening e'lonimni ko'ra oladimi? <span>+</span></div>
+            <div class="faq-a">Hozirgi demo versiyada ma'lumotlar brauzer localStorage da saqlanadi (bir xil qurilma/brauzer). Boshqa telefon yoki shahardan ko'rish uchun server (Supabase) ulash kerak.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">Narsani qanday xavfsiz qaytaraman? <span>+</span></div>
+            <div class="faq-a">Xabarlar orqali bog'laning, egalikni tasdiqlang (foto, maxsus belgi). Ommaviy joyda uchrashing. Shaxsiy manzil va parollarni hech kimga bermang.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-q">Til va mavzuni qanday o'zgartiraman? <span>+</span></div>
+            <div class="faq-a">Yuqori o'ng burchakdagi UZ/RU/EN tanlovi va oy/quyosh tugmasi orqali. Tanlov saqlanadi.</div>
+          </div>
+        </div>
+        
+        <div class="glass-card" style="padding:1.5rem">
+          <h2 style="font-size:1.15rem;margin-bottom:1rem">Biz bilan bog'laning</h2>
+          <form id="supportForm">
+            <div class="form-group">
+              <label class="form-label">Ism</label>
+              <input type="text" name="name" class="form-input" required placeholder="Ismingiz">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email yoki telefon</label>
+              <input type="text" name="contact" class="form-input" required placeholder="email@example.com yoki +998...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Xabar</label>
+              <textarea name="message" class="form-textarea" required minlength="10" placeholder="Muammo yoki savolingiz..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width:100%">Yuborish</button>
+          </form>
+          <p style="margin-top:1.25rem;font-size:0.8125rem;color:var(--text-muted)">
+            Email: support@topdik-ku.uz<br>
+            Telegram: @topdikku_support
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <div id="app-footer"></div>
+  
+  <script src="js/i18n.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/cloud.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.initCommon('');
+      
+      document.querySelectorAll('.faq-q').forEach(q => {
+        q.addEventListener('click', () => {
+          q.parentElement.classList.toggle('open');
+        });
+      });
+      
+      document.getElementById('supportForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        UI.toast('Xabaringiz qabul qilindi. Tez orada javob beramiz.', 'success');
+        e.target.reset();
+      });
+      
+      updatePageTranslations();
+    });
+  </script>
+</body>
+</html>

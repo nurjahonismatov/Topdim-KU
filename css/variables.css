@@ -1,0 +1,72 @@
+:root {
+  /* Light Mode - Liquid Glass */
+  --bg-primary: #f5f7fb;
+  --bg-secondary: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.72);
+  --bg-glass-strong: rgba(255, 255, 255, 0.88);
+  --bg-card: rgba(255, 255, 255, 0.78);
+  --bg-hover: rgba(255, 255, 255, 0.95);
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --text-inverse: #ffffff;
+  
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-light: #dbeafe;
+  --accent-soft: rgba(37, 99, 235, 0.14);
+  
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --info: #0ea5e9;
+  
+  --border: rgba(148, 163, 184, 0.35);
+  --border-strong: rgba(148, 163, 184, 0.55);
+  --shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.12);
+  --shadow-glass: 0 8px 32px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255,255,255,0.85);
+  
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+  --radius-full: 9999px;
+  
+  --blur: 24px;
+  --blur-strong: 48px;
+  
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  --header-height: 72px;
+  --sidebar-width: 280px;
+  
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+[data-theme="dark"] {
+  --bg-primary: #070b14;
+  --bg-secondary: #0f1623;
+  --bg-glass: rgba(15, 22, 35, 0.55);
+  --bg-glass-strong: rgba(15, 22, 35, 0.78);
+  --bg-card: rgba(22, 32, 51, 0.5);
+  --bg-hover: rgba(30, 41, 59, 0.7);
+  
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-inverse: #0f172a;
+  
+  --accent: #3b82f6;
+  --accent-hover: #60a5fa;
+  --accent-light: #1e3a8a;
+  --accent-soft: rgba(59, 130, 246, 0.2);
+  
+  --border: rgba(148, 163, 184, 0.12);
+  --border-strong: rgba(148, 163, 184, 0.28);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 24px 60px rgba(0, 0, 0, 0.45);
+  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255,255,255,0.06);
+}

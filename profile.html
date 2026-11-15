@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil — Topdik-KU</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <script src="js/theme.js"></script>
+  <style>
+    .profile-header { display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem; padding: 1.5rem; border-radius: var(--radius-lg); }
+    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: var(--accent-soft); display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 700; color: var(--accent); }
+    .profile-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .profile-tab { padding: 0.6rem 1.1rem; border-radius: var(--radius-full); font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all var(--transition); }
+    .profile-tab.active { background: var(--accent-soft); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div id="app-header"></div>
+  
+  <main class="main">
+    <div class="container" id="profileContent"></div>
+  </main>
+  
+  <div id="app-footer"></div>
+  
+  <script src="js/i18n.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/cloud.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.initCommon('');
+      
+      const session = DataStore.getSession();
+      if (!session) {
+        location.href = 'auth.html?mode=login&redirect=profile.html';
+        return;
+      }
+      
+      const myItems = DataStore.getItems({}).filter(i => i.userId === session.id);
+      const collects = DataStore.getCollects(session.id);
+      const collectedItems = collects.map(id => DataStore.getItem(id)).filter(Boolean);
+      
+      document.getElementById('profileContent').innerHTML = `
+        <div class="glass profile-header">
+          <div class="profile-avatar">${(session.name || 'U')[0].toUpperCase()}</div>
+          <div style="flex:1">
+            <h1 style="font-size:1.5rem">${UI.escape(session.name)}</h1>
+            <p style="color:var(--text-muted);font-size:0.9375rem">${session.email || session.phone || ''}</p>
+            <div style="margin-top:0.5rem">
+              ${session.verified ? '<span class="badge badge-success">✓ Verified</span>' : '<span class="badge badge-warning">Unverified</span>'}
+            </div>
+          </div>
+          <button class="btn btn-secondary btn-sm" id="editBtn" data-i18n="profile_edit">Tahrirlash</button>
+        </div>
+        
+        <div class="profile-tabs">
+          <div class="profile-tab active" data-tab="listings" data-i18n="profile_listings">Mening e'lonlarim</div>
+          <div class="profile-tab" data-tab="saved" data-i18n="profile_saved">Saqlanganlar</div>
+          <div class="profile-tab" data-tab="settings" data-i18n="profile_settings">Sozlamalar</div>
+        </div>
+        
+        <div id="tab-listings">
+          <div class="grid grid-3">
+            ${myItems.length ? myItems.map(i => UI.itemCard(i, { showSave: false })).join('') : '<div class="empty-state"><p>Hali e\'lonlaringiz yo\'q</p><a href="report.html" class="btn btn-primary" style="margin-top:1rem">E\'lon berish</a></div>'}
+          </div>
+        </div>
+        
+        <div id="tab-saved" style="display:none">
+          <div class="grid grid-3">
+            ${collectedItems.length ? collectedItems.map(i => UI.itemCard(i)).join('') : '<div class="empty-state"><p>Saqlanganlar bo\'sh</p></div>'}
+          </div>
+        </div>
+        
+        <div id="tab-settings" style="display:none">
+          <div class="glass-card" style="padding:1.5rem;max-width:480px">
+            <div class="form-group">
+              <label class="form-label">Til / Language</label>
+              <select id="profLang" class="form-select">
+                <option value="uz">O'zbekcha</option>
+                <option value="ru">Русский</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mavzu / Theme</label>
+              <button class="btn btn-secondary" data-theme-toggle>Light / Dark</button>
+            </div>
+            <hr style="border:none;border-top:1px solid var(--border);margin:1.5rem 0">
+            <button class="btn btn-danger btn-sm" id="deleteAccount">Hisobni o'chirish</button>
+          </div>
+        </div>
+      `;
+      
+      document.querySelectorAll('.profile-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          ['listings', 'saved', 'settings'].forEach(id => {
+            document.getElementById('tab-' + id).style.display = tab.dataset.tab === id ? 'block' : 'none';
+          });
+        });
+      });
+      
+      document.getElementById('profLang').value = currentLang;
+      document.getElementById('profLang').addEventListener('change', (e) => setLanguage(e.target.value));
+      
+      document.getElementById('deleteAccount').addEventListener('click', () => {
+        if (confirm(t('confirm_delete'))) {
+          DataStore.logout();
+          UI.toast('Hisob o\'chirildi (demo)', 'info');
+          setTimeout(() => location.href = 'index.html', 500);
+        }
+      });
+      
+      document.getElementById('editBtn').addEventListener('click', () => {
+        UI.toast('Profil tahrirlash (demo)', 'info');
+      });
+      
+      updatePageTranslations();
+    });
+  </script>
+</body>
+</html>

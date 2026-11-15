@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Topdik-KU</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <script src="js/theme.js"></script>
+  <style>
+    .admin-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 2rem; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    .admin-table th, .admin-table td { padding: 0.75rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+    .admin-table th { font-weight: 600; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; }
+    @media (max-width: 768px) { .admin-stats { grid-template-columns: 1fr 1fr; } }
+  </style>
+</head>
+<body>
+  <div id="app-header"></div>
+  
+  <main class="main">
+    <div class="container">
+      <h1 style="margin-bottom:1.5rem" data-i18n="nav_admin">Admin panel</h1>
+      
+      <div class="admin-stats" id="adminStats"></div>
+      
+      <div class="glass-card" style="padding:0;overflow:hidden">
+        <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);font-weight:600">Barcha e'lonlar</div>
+        <div style="overflow-x:auto">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Nomi</th>
+                <th>Turi</th>
+                <th>Kategoriya</th>
+                <th>Holat</th>
+                <th>Sana</th>
+                <th>Amallar</th>
+              </tr>
+            </thead>
+            <tbody id="adminTable"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <div id="app-footer"></div>
+  
+  <script src="js/i18n.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/cloud.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.initCommon('');
+      
+      const session = DataStore.getSession();
+      // Demo: any logged-in user can access admin for testing
+      // In production: check role === 'admin'
+      if (!session) {
+        location.href = 'auth.html?mode=login&redirect=admin.html';
+        return;
+      }
+      
+      const stats = DataStore.getStats();
+      const items = DataStore.getItems({ sort: 'newest' });
+      
+      document.getElementById('adminStats').innerHTML = `
+        <div class="glass-card stat-card"><div class="stat-card__value">${items.length}</div><div class="stat-card__label">Jami e'lonlar</div></div>
+        <div class="glass-card stat-card"><div class="stat-card__value">${stats.found}</div><div class="stat-card__label">Topilgan</div></div>
+        <div class="glass-card stat-card"><div class="stat-card__value">${stats.returned}</div><div class="stat-card__label">Qaytarilgan</div></div>
+        <div class="glass-card stat-card"><div class="stat-card__value">${stats.users}</div><div class="stat-card__label">Foydalanuvchilar</div></div>
+      `;
+      
+      document.getElementById('adminTable').innerHTML = items.map(i => `
+        <tr>
+          <td><a href="item.html?id=${i.id}" style="color:var(--accent)">${UI.escape(i.title)}</a></td>
+          <td>${i.type}</td>
+          <td>${UI.categoryName(i.category)}</td>
+          <td>${UI.statusBadge(i.status)}</td>
+          <td>${UI.formatDate(i.date)}</td>
+          <td>
+            <button class="btn btn-sm btn-ghost mark-returned" data-id="${i.id}" ${i.status==='returned'?'disabled':''}>Returned</button>
+            <button class="btn btn-sm btn-ghost delete-item" data-id="${i.id}" style="color:var(--danger)">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+      
+      document.querySelectorAll('.mark-returned').forEach(btn => {
+        btn.addEventListener('click', () => {
+          DataStore.updateItem(btn.dataset.id, { status: 'returned' });
+          UI.toast('Holat yangilandi', 'success');
+          location.reload();
+        });
+      });
+      
+      document.querySelectorAll('.delete-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (confirm(t('confirm_delete'))) {
+            DataStore.deleteItem(btn.dataset.id);
+            UI.toast('O\'chirildi', 'info');
+            location.reload();
+          }
+        });
+      });
+      
+      updatePageTranslations();
+    });
+  </script>
+</body>
+</html>

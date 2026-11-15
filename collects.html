@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mening to'plamlarim — Topdik-KU</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <script src="js/theme.js"></script>
+</head>
+<body>
+  <div id="app-header"></div>
+  
+  <main class="main">
+    <div class="container">
+      <h1 style="margin-bottom:1.5rem" data-i18n="nav_collects">Mening to'plamlarim</h1>
+      <div class="grid grid-3" id="collectsGrid"></div>
+      <div class="empty-state" id="emptyState" style="display:none">
+        <div style="font-size:3rem;margin-bottom:1rem">🤍</div>
+        <h3>Saqlanganlar bo'sh</h3>
+        <p>Qiziqarli e'lonlarni ❤️ tugmasi bilan saqlang</p>
+        <a href="found.html" class="btn btn-primary" style="margin-top:1rem">E'lonlarni ko'rish</a>
+      </div>
+    </div>
+  </main>
+  
+  <div id="app-footer"></div>
+  
+  <script src="js/i18n.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/cloud.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.initCommon('collects');
+      
+      const session = DataStore.getSession();
+      if (!session) {
+        location.href = 'auth.html?mode=login&redirect=collects.html';
+        return;
+      }
+      
+      const ids = DataStore.getCollects(session.id);
+      const items = ids.map(id => DataStore.getItem(id)).filter(Boolean);
+      
+      if (items.length === 0) {
+        document.getElementById('emptyState').style.display = 'block';
+      } else {
+        document.getElementById('collectsGrid').innerHTML = items.map(i => UI.itemCard(i)).join('');
+      }
+      
+      updatePageTranslations();
+    });
+  </script>
+</body>
+</html>

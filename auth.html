@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kirish — Topdik-KU</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <script src="js/theme.js"></script>
+  <style>
+    .auth-wrap { min-height: calc(100vh - var(--header-height)); display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; }
+    .auth-card { width: 100%; max-width: 420px; padding: 2rem; }
+    .auth-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .auth-tab { flex: 1; padding: 0.75rem; text-align: center; border-radius: var(--radius-md); font-weight: 500; color: var(--text-secondary); cursor: pointer; transition: all var(--transition); }
+    .auth-tab.active { background: var(--accent-soft); color: var(--accent); }
+    .otp-inputs { display: flex; gap: 0.5rem; justify-content: center; }
+    .otp-inputs input { width: 44px; height: 52px; text-align: center; font-size: 1.25rem; font-weight: 600; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg-glass); }
+    .otp-timer { text-align: center; margin-top: 1rem; font-size: 0.875rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+  <div id="app-header"></div>
+  
+  <main class="auth-wrap">
+    <div class="glass-card auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" data-mode="login" data-i18n="nav_login">Kirish</div>
+        <div class="auth-tab" data-mode="register" data-i18n="nav_register">Ro'yxatdan o'tish</div>
+      </div>
+      
+      <!-- Login -->
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" data-i18n="auth_email">Email</label>
+          <input type="email" name="email" class="form-input" required placeholder="email@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="auth_password">Parol</label>
+          <input type="password" name="password" class="form-input" required minlength="6">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%" data-i18n="btn_login">Kirish</button>
+        
+        <div style="text-align:center;margin:1.25rem 0;color:var(--text-muted);font-size:0.875rem" data-i18n="auth_or">yoki</div>
+        
+        <button type="button" class="btn btn-secondary" style="width:100%" id="googleBtn" data-i18n="auth_google">Google orqali</button>
+        
+        <p style="text-align:center;margin-top:1.25rem;font-size:0.875rem">
+          <span data-i18n="auth_no_account">Hisobingiz yo'qmi?</span>
+          <a href="#" class="switch-mode" data-mode="register" style="color:var(--accent);font-weight:500" data-i18n="nav_register">Ro'yxatdan o'tish</a>
+        </p>
+      </form>
+      
+      <!-- Register -->
+      <form id="registerForm" style="display:none">
+        <div class="form-group">
+          <label class="form-label" data-i18n="auth_name">To'liq ism</label>
+          <input type="text" name="name" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="auth_email">Email</label>
+          <input type="email" name="email" class="form-input" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="auth_phone">Telefon raqam</label>
+          <input type="tel" name="phone" class="form-input" placeholder="+998 90 123 45 67">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="auth_password">Parol</label>
+          <input type="password" name="password" class="form-input" required minlength="6">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%" data-i18n="btn_register">Ro'yxatdan o'tish</button>
+        
+        <p style="text-align:center;margin-top:1.25rem;font-size:0.875rem">
+          <span data-i18n="auth_has_account">Allaqachon hisobingiz bormi?</span>
+          <a href="#" class="switch-mode" data-mode="login" style="color:var(--accent);font-weight:500" data-i18n="nav_login">Kirish</a>
+        </p>
+      </form>
+      
+      <!-- OTP (hidden) -->
+      <div id="otpSection" style="display:none">
+        <h3 style="text-align:center;margin-bottom:0.5rem" data-i18n="auth_otp">Tasdiqlash kodi</h3>
+        <p style="text-align:center;font-size:0.875rem;color:var(--text-muted);margin-bottom:1.25rem" id="otpHint"></p>
+        <div class="otp-inputs" id="otpInputs">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        </div>
+        <div class="otp-timer" id="otpTimer"></div>
+        <button type="button" class="btn btn-primary" style="width:100%;margin-top:1.25rem" id="verifyOtpBtn" data-i18n="btn_submit">Yuborish</button>
+        <button type="button" class="btn btn-ghost" style="width:100%;margin-top:0.5rem;display:none" id="resendBtn" data-i18n="btn_resend">Qayta yuborish</button>
+      </div>
+    </div>
+  </main>
+  
+  <div id="app-footer"></div>
+  
+  <script src="js/i18n.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/cloud.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.initCommon('');
+      
+      if (DataStore.getSession()) {
+        location.href = 'profile.html';
+        return;
+      }
+      
+      const params = new URLSearchParams(location.search);
+      let mode = params.get('mode') || 'login';
+      
+      function setMode(m) {
+        mode = m;
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === m));
+        document.getElementById('loginForm').style.display = m === 'login' ? 'block' : 'none';
+        document.getElementById('registerForm').style.display = m === 'register' ? 'block' : 'none';
+        document.getElementById('otpSection').style.display = 'none';
+      }
+      
+      document.querySelectorAll('.auth-tab, .switch-mode').forEach(el => {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          setMode(el.dataset.mode);
+        });
+      });
+      
+      setMode(mode);
+      
+      // Login
+      document.getElementById('loginForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        try {
+          DataStore.login({
+            email: form.email.value.trim(),
+            password: form.password.value
+          });
+          UI.toast('Xush kelibsiz!', 'success');
+          const redirect = params.get('redirect') || 'index.html';
+          setTimeout(() => location.href = redirect, 500);
+        } catch (err) {
+          UI.toast(err.message || t('error_generic'), 'error');
+        }
+      });
+      
+      // Register + OTP flow
+      let pendingUser = null;
+      let otpTarget = null;
+      let otpTimerInterval = null;
+      
+      document.getElementById('registerForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const email = form.email.value.trim();
+        const phone = form.phone.value.trim();
+        
+        try {
+          pendingUser = {
+            name: form.name.value.trim(),
+            email,
+            phone: phone || null,
+            password: form.password.value
+          };
+          
+          otpTarget = email || phone;
+          const otpResult = DataStore.sendOTP(otpTarget);
+          
+          document.getElementById('loginForm').style.display = 'none';
+          document.getElementById('registerForm').style.display = 'none';
+          document.getElementById('otpSection').style.display = 'block';
+          document.getElementById('otpHint').innerHTML = `
+            ${t('auth_otp_sent')}: <strong>${otpTarget}</strong><br>
+            <span style="display:inline-block;margin-top:0.75rem;padding:0.5rem 1rem;background:var(--accent-soft);border-radius:8px;font-size:1.25rem;letter-spacing:0.15em;font-weight:700;color:var(--accent)">
+              ${otpResult.demoCode}
+            </span>
+            <br><small style="color:var(--text-muted);margin-top:0.35rem;display:inline-block">Demo rejim: kod ekranda ko'rsatiladi</small>
+          `;
+          
+          startOtpTimer(120);
+          document.querySelector('#otpInputs input').focus();
+        } catch (err) {
+          UI.toast(err.message || t('error_generic'), 'error');
+        }
+      });
+      
+      function startOtpTimer(seconds) {
+        clearInterval(otpTimerInterval);
+        let left = seconds;
+        const timerEl = document.getElementById('otpTimer');
+        const resendBtn = document.getElementById('resendBtn');
+        resendBtn.style.display = 'none';
+        
+        function tick() {
+          const m = Math.floor(left / 60);
+          const s = String(left % 60).padStart(2, '0');
+          timerEl.textContent = t('auth_otp_expires', { time: `${m}:${s}` });
+          if (left <= 0) {
+            clearInterval(otpTimerInterval);
+            timerEl.textContent = t('auth_otp_expired');
+            resendBtn.style.display = 'block';
+          }
+          left--;
+        }
+        tick();
+        otpTimerInterval = setInterval(tick, 1000);
+      }
+      
+      // OTP inputs
+      const otpInputs = document.querySelectorAll('#otpInputs input');
+      otpInputs.forEach((input, i) => {
+        input.addEventListener('input', () => {
+          if (input.value && i < otpInputs.length - 1) otpInputs[i + 1].focus();
+        });
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && !input.value && i > 0) otpInputs[i - 1].focus();
+        });
+      });
+      
+      document.getElementById('verifyOtpBtn').addEventListener('click', () => {
+        const code = [...otpInputs].map(i => i.value).join('');
+        if (code.length !== 6) {
+          UI.toast('6 raqamli kodni kiriting', 'error');
+          return;
+        }
+        try {
+          DataStore.verifyOTP(otpTarget, code);
+          const user = DataStore.register(pendingUser);
+          user.verified = true;
+          DataStore.setSession(user);
+          UI.toast(t('report_success'), 'success');
+          setTimeout(() => location.href = 'index.html', 600);
+        } catch (err) {
+          UI.toast(err.message, 'error');
+        }
+      });
+      
+      document.getElementById('resendBtn').addEventListener('click', () => {
+        const otpResult = DataStore.sendOTP(otpTarget);
+        document.getElementById('otpHint').innerHTML = `
+          ${t('auth_otp_sent')}: <strong>${otpTarget}</strong><br>
+          <span style="display:inline-block;margin-top:0.75rem;padding:0.5rem 1rem;background:var(--accent-soft);border-radius:8px;font-size:1.25rem;letter-spacing:0.15em;font-weight:700;color:var(--accent)">
+            ${otpResult.demoCode}
+          </span>
+          <br><small style="color:var(--text-muted);margin-top:0.35rem;display:inline-block">Demo rejim: kod ekranda ko'rsatiladi</small>
+        `;
+        startOtpTimer(120);
+        UI.toast(t('auth_otp_sent'), 'info');
+      });
+      
+      // Google login (demo — production uchun Google Cloud OAuth client ID kerak)
+      document.getElementById('googleBtn').addEventListener('click', () => {
+        const email = 'user' + Date.now().toString().slice(-6) + '@gmail.com';
+        const name = 'Google User';
+        let user;
+        try {
+          user = DataStore.register({
+            name,
+            email,
+            phone: null,
+            password: 'google-oauth-demo-' + Date.now()
+          });
+        } catch (err) {
+          user = {
+            id: 'user_google_' + Date.now(),
+            name,
+            email,
+            phone: null,
+            verified: true,
+            role: 'user',
+            provider: 'google',
+            createdAt: new Date().toISOString()
+          };
+          const users = JSON.parse(localStorage.getItem('topdik_users') || '[]');
+          users.push(user);
+          localStorage.setItem('topdik_users', JSON.stringify(users));
+        }
+        user.verified = true;
+        user.provider = 'google';
+        DataStore.setSession(user);
+        if (window.Cloud) Cloud.syncToCloud();
+        UI.toast('Google orqali kirdingiz', 'success');
+        const redirect = params.get('redirect') || 'index.html';
+        setTimeout(() => location.href = redirect, 500);
+      });
+      
+      updatePageTranslations();
+    });
+  </script>
+</body>
+</html>

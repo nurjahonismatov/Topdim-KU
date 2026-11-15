@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Topilganlar — Topdik-KU</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <script src="js/theme.js"></script>
+  <style>
+    .page-header { margin-bottom: 1.5rem; }
+    .page-header h1 { font-size: 1.75rem; margin-bottom: 0.35rem; }
+    .filters-drawer { display: none; }
+    @media (max-width: 768px) {
+      .filters-bar .filter-desktop { display: none; }
+      .filters-drawer { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app-header"></div>
+  
+  <main class="main">
+    <div class="container">
+      <div class="page-header">
+        <h1 data-i18n="nav_found">Topilganlar</h1>
+        <p class="results-count" id="resultsCount"></p>
+      </div>
+      
+      <!-- Filters -->
+      <div class="glass filters-bar">
+        <input type="search" id="searchInput" class="form-input" style="max-width:220px;padding:0.6rem 1rem" data-i18n-placeholder="hero_search_placeholder" placeholder="Qidirish...">
+        
+        <select id="filterCategory" class="form-select" style="width:auto;padding:0.6rem 1rem">
+          <option value="" data-i18n="filter_category">Kategoriya</option>
+        </select>
+        
+        <select id="filterCity" class="form-select" style="width:auto;padding:0.6rem 1rem">
+          <option value="" data-i18n="filter_location">Joylashuv</option>
+        </select>
+        
+        <select id="filterStatus" class="form-select" style="width:auto;padding:0.6rem 1rem">
+          <option value="" data-i18n="filter_status">Holat</option>
+          <option value="active" data-i18n="status_active">Faol</option>
+          <option value="returned" data-i18n="status_returned">Qaytarilgan</option>
+        </select>
+        
+        <select id="sortSelect" class="form-select" style="width:auto;padding:0.6rem 1rem">
+          <option value="newest" data-i18n="sort_newest">Eng yangi</option>
+          <option value="oldest" data-i18n="sort_oldest">Eng eski</option>
+        </select>
+        
+        <button class="btn btn-sm btn-ghost" id="clearFilters" data-i18n="btn_clear">Tozalash</button>
+      </div>
+      
+      <div class="filter-chips" id="activeChips"></div>
+      
+      <div class="grid grid-3" id="itemsGrid">
+        <!-- items -->
+      </div>
+      
+      <div class="empty-state" id="emptyState" style="display:none">
+        <div style="font-size:3rem;margin-bottom:1rem">🔍</div>
+        <h3 data-i18n="no_results">Hech narsa topilmadi</h3>
+        <p data-i18n="no_results_desc">Filtrlarni o'zgartirib ko'ring yoki yangi e'lon bering.</p>
+        <a href="report.html?type=found" class="btn btn-primary" style="margin-top:1rem" data-i18n="nav_report">E'lon berish</a>
+      </div>
+    </div>
+  </main>
+  
+  <div id="app-footer"></div>
+  
+  <script src="js/i18n.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/cloud.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    const PAGE_TYPE = 'found';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.initCommon(PAGE_TYPE);
+      
+      // Populate filters
+      const catSelect = document.getElementById('filterCategory');
+      CATEGORIES.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = t('cat_' + c.id);
+        opt.setAttribute('data-i18n', 'cat_' + c.id);
+        catSelect.appendChild(opt);
+      });
+      
+      const citySelect = document.getElementById('filterCity');
+      CITIES.forEach(city => {
+        const opt = document.createElement('option');
+        opt.value = city;
+        opt.textContent = city;
+        citySelect.appendChild(opt);
+      });
+      
+      // URL params
+      const params = new URLSearchParams(location.search);
+      if (params.get('q')) document.getElementById('searchInput').value = params.get('q');
+      if (params.get('category')) catSelect.value = params.get('category');
+      
+      function getFilters() {
+        return {
+          type: PAGE_TYPE,
+          q: document.getElementById('searchInput').value.trim(),
+          category: catSelect.value,
+          city: citySelect.value,
+          status: document.getElementById('filterStatus').value,
+          sort: document.getElementById('sortSelect').value
+        };
+      }
+      
+      function render() {
+        const filters = getFilters();
+        const items = DataStore.getItems(filters);
+        
+        document.getElementById('resultsCount').textContent = t('results_count', { count: items.length });
+        
+        // Chips
+        const chips = [];
+        if (filters.q) chips.push({ key: 'q', label: `"${filters.q}"` });
+        if (filters.category) chips.push({ key: 'category', label: t('cat_' + filters.category) });
+        if (filters.city) chips.push({ key: 'city', label: filters.city });
+        if (filters.status) chips.push({ key: 'status', label: t('status_' + filters.status) });
+        
+        document.getElementById('activeChips').innerHTML = chips.map(c => `
+          <span class="chip active">${c.label} <span class="remove" data-key="${c.key}">×</span></span>
+        `).join('');
+        
+        document.getElementById('activeChips').querySelectorAll('.remove').forEach(el => {
+          el.addEventListener('click', () => {
+            const k = el.dataset.key;
+            if (k === 'q') document.getElementById('searchInput').value = '';
+            if (k === 'category') catSelect.value = '';
+            if (k === 'city') citySelect.value = '';
+            if (k === 'status') document.getElementById('filterStatus').value = '';
+            render();
+          });
+        });
+        
+        const grid = document.getElementById('itemsGrid');
+        const empty = document.getElementById('emptyState');
+        
+        if (items.length === 0) {
+          grid.innerHTML = '';
+          empty.style.display = 'block';
+        } else {
+          empty.style.display = 'none';
+          grid.innerHTML = items.map(i => UI.itemCard(i)).join('');
+        }
+      }
+      
+      // Events
+      ['searchInput', 'filterCategory', 'filterCity', 'filterStatus', 'sortSelect'].forEach(id => {
+        document.getElementById(id).addEventListener('input', render);
+        document.getElementById(id).addEventListener('change', render);
+      });
+      
+      document.getElementById('clearFilters').addEventListener('click', () => {
+        document.getElementById('searchInput').value = '';
+        catSelect.value = '';
+        citySelect.value = '';
+        document.getElementById('filterStatus').value = '';
+        document.getElementById('sortSelect').value = 'newest';
+        render();
+      });
+      
+      render();
+      updatePageTranslations();
+
+      document.addEventListener('cloudSynced', render);
+      document.addEventListener('cloudDataUpdated', render);
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E'lon berish — Topdik-KU</title>
+  <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <script src="js/theme.js"></script>
+  <style>
+    .report-form { max-width: 640px; margin: 0 auto; }
+    .step-indicator { display: flex; gap: 0.5rem; margin-bottom: 2rem; justify-content: center; }
+    .step-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); transition: all var(--transition); }
+    .step-dot.active { background: var(--accent); width: 28px; border-radius: 5px; }
+    .form-step { display: none; }
+    .form-step.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .type-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .type-card {
+      padding: 1.75rem 1.25rem;
+      text-align: center;
+      border-radius: var(--radius-lg);
+      border: 2px solid var(--border);
+      cursor: pointer;
+      transition: all var(--transition);
+      background: var(--bg-card);
+      backdrop-filter: blur(16px);
+    }
+    .type-card:hover, .type-card.selected {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.15);
+    }
+    .type-card .icon-wrap {
+      width: 56px; height: 56px;
+      margin: 0 auto 0.85rem;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+    .image-preview { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 0.75rem; }
+    .image-preview .preview-item {
+      position: relative;
+      width: 88px; height: 88px;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .image-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .guest-note {
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+      background: var(--accent-soft);
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 1.25rem;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-header"></div>
+  
+  <main class="main">
+    <div class="container">
+      <div class="report-form">
+        <h1 style="text-align:center;margin-bottom:0.35rem" data-i18n="report_title">E'lon berish</h1>
+        <p style="text-align:center;color:var(--text-muted);margin-bottom:1.75rem;font-size:0.9375rem">
+          Hisobsiz ham e'lon berishingiz mumkin
+        </p>
+        
+        <div class="step-indicator">
+          <div class="step-dot active" data-step="1"></div>
+          <div class="step-dot" data-step="2"></div>
+          <div class="step-dot" data-step="3"></div>
+        </div>
+        
+        <form id="reportForm" class="glass-card" style="padding:1.75rem 1.5rem">
+          <div class="form-step active" data-step="1">
+            <h3 style="margin-bottom:1.25rem;font-size:1.125rem" data-i18n="report_type">E'lon turi</h3>
+            <div class="type-cards">
+              <div class="type-card" data-type="lost">
+                <div class="icon-wrap">
+                  <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
+                </div>
+                <strong data-i18n="hero_btn_lost">Yo'qotdim</strong>
+              </div>
+              <div class="type-card" data-type="found">
+                <div class="icon-wrap">
+                  <svg width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                </div>
+                <strong data-i18n="hero_btn_found">Topdim</strong>
+              </div>
+            </div>
+            <input type="hidden" name="type" id="itemType" required>
+          </div>
+          
+          <div class="form-step" data-step="2">
+            <div class="form-group">
+              <label class="form-label" data-i18n="report_name">Narsa nomi</label>
+              <input type="text" name="title" class="form-input" required maxlength="100" placeholder="Masalan: iPhone 15 Pro">
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="report_category">Kategoriya</label>
+              <select name="category" class="form-select" required id="catSelect">
+                <option value="">Tanlang</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="report_desc">Batafsil tavsif</label>
+              <textarea name="description" class="form-textarea" required minlength="15" placeholder="Rang, o'lcham, maxsus belgilari, holati..."></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="report_images">Rasmlar (ixtiyoriy)</label>
+              <input type="file" id="imageInput" accept="image/*" multiple class="form-input">
+              <div class="image-preview" id="imagePreview"></div>
+            </div>
+          </div>
+          
+          <div class="form-step" data-step="3">
+            <div id="guestFields" class="guest-note" style="display:none">
+              Hisobsiz e'lon berayapsiz. Bog'lanish uchun ism va telefon qoldiring (faqat moslik bo'lganda ko'rinadi).
+            </div>
+            <div class="form-group" id="contactNameGroup" style="display:none">
+              <label class="form-label">Ismingiz</label>
+              <input type="text" name="contactName" class="form-input" placeholder="Ism Familiya">
+            </div>
+            <div class="form-group" id="contactPhoneGroup" style="display:none">
+              <label class="form-label">Telefon (ixtiyoriy)</label>
+              <input type="tel" name="contactPhone" class="form-input" placeholder="+998 90 123 45 67">
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-i18n="report_location">Joylashuv</label>
+              <input type="text" name="location" class="form-input" required placeholder="Masalan: Toshkent, Chilonzor metro">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Shahar</label>
+              <select name="city" class="form-select" required id="citySelect">
+                <option value="">Tanlang</option>
+              </select>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+              <div class="form-group">
+                <label class="form-label" data-i18n="report_date">Sana</label>
+                <input type="date" name="date" class="form-input" required id="dateInput">
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-i18n="report_time">Vaqt</label>
+                <input type="time" name="time" class="form-input">
+              </div>
+            </div>
+          </div>
+          
+          <div style="display:flex;justify-content:space-between;margin-top:1.5rem;gap:1rem">
+            <button type="button" class="btn btn-secondary" id="prevBtn" style="display:none" data-i18n="btn_back">Orqaga</button>
+            <div style="flex:1"></div>
+            <button type="button" class="btn btn-primary" id="nextBtn" data-i18n="btn_next">Keyingi</button>
+            <button type="submit" class="btn btn-primary" id="submitBtn" style="display:none" data-i18n="btn_submit">Yuborish</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+  
+  <div id="app-footer"></div>
+  
+  <script src="js/i18n.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/config.js"></script>
+  <script src="js/cloud.js"></script>
+  <script src="js/ui.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      UI.initCommon('report');
+      const session = DataStore.getSession();
+      
+      CATEGORIES.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.id;
+        opt.textContent = t('cat_' + c.id);
+        document.getElementById('catSelect').appendChild(opt);
+      });
+      CITIES.forEach(city => {
+        const opt = document.createElement('option');
+        opt.value = city;
+        opt.textContent = city;
+        document.getElementById('citySelect').appendChild(opt);
+      });
+      
+      document.getElementById('dateInput').valueAsDate = new Date();
+      
+      if (!session) {
+        document.getElementById('guestFields').style.display = 'block';
+        document.getElementById('contactNameGroup').style.display = 'block';
+        document.getElementById('contactPhoneGroup').style.display = 'block';
+      }
+      
+      const params = new URLSearchParams(location.search);
+      const preType = params.get('type');
+      if (preType === 'lost' || preType === 'found') {
+        document.querySelector(`.type-card[data-type="${preType}"]`)?.classList.add('selected');
+        document.getElementById('itemType').value = preType;
+      }
+      
+      document.querySelectorAll('.type-card').forEach(card => {
+        card.addEventListener('click', () => {
+          document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+          card.classList.add('selected');
+          document.getElementById('itemType').value = card.dataset.type;
+        });
+      });
+      
+      const previewImages = [];
+      document.getElementById('imageInput').addEventListener('change', (e) => {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = '';
+        previewImages.length = 0;
+        [...e.target.files].slice(0, 4).forEach(file => {
+          const url = URL.createObjectURL(file);
+          previewImages.push(url);
+          const wrap = document.createElement('div');
+          wrap.className = 'preview-item';
+          wrap.innerHTML = `<img src="${url}" alt="">`;
+          preview.appendChild(wrap);
+        });
+      });
+      
+      let currentStep = 1;
+      const totalSteps = 3;
+      
+      function showStep(n) {
+        currentStep = n;
+        document.querySelectorAll('.form-step').forEach(s => s.classList.toggle('active', +s.dataset.step === n));
+        document.querySelectorAll('.step-dot').forEach(d => d.classList.toggle('active', +d.dataset.step <= n));
+        document.getElementById('prevBtn').style.display = n > 1 ? 'inline-flex' : 'none';
+        document.getElementById('nextBtn').style.display = n < totalSteps ? 'inline-flex' : 'none';
+        document.getElementById('submitBtn').style.display = n === totalSteps ? 'inline-flex' : 'none';
+      }
+      
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        if (currentStep === 1 && !document.getElementById('itemType').value) {
+          UI.toast('E\'lon turini tanlang', 'error');
+          return;
+        }
+        if (currentStep === 2) {
+          const title = document.querySelector('[name=title]').value.trim();
+          const cat = document.querySelector('[name=category]').value;
+          const desc = document.querySelector('[name=description]').value.trim();
+          if (!title || !cat || desc.length < 15) {
+            UI.toast('Barcha majburiy maydonlarni to\'ldiring (tavsif kamida 15 belgi)', 'error');
+            return;
+          }
+        }
+        showStep(currentStep + 1);
+      });
+      
+      document.getElementById('prevBtn').addEventListener('click', () => showStep(currentStep - 1));
+      
+      document.getElementById('reportForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        if (!form.type.value) {
+          UI.toast('E\'lon turini tanlang', 'error');
+          return;
+        }
+        const data = {
+          type: form.type.value,
+          title: form.title.value.trim(),
+          category: form.category.value,
+          description: form.description.value.trim(),
+          location: form.location.value.trim(),
+          city: form.city.value,
+          date: form.date.value,
+          time: form.time.value || null,
+          images: previewImages.slice(0, 1),
+          contactName: form.contactName?.value?.trim() || null,
+          contactPhone: form.contactPhone?.value?.trim() || null
+        };
+        try {
+          const item = DataStore.createItem(data);
+          UI.toast(t('report_success'), 'success');
+          // Cloud ga yozib bo'lgach o'tish — boshqa qurilmalar ko'rsin
+          const go = () => { location.href = `item.html?id=${item.id}`; };
+          if (window.Cloud) {
+            Cloud.syncToCloud().then(go).catch(go);
+            setTimeout(go, 2500); // fallback
+          } else {
+            setTimeout(go, 600);
+          }
+        } catch (err) {
+          UI.toast(t('error_generic'), 'error');
+        }
+      });
+      
+      updatePageTranslations();
+    });
+  </script>
+</body>
+</html>
